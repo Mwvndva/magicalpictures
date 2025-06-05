@@ -1,6 +1,8 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { seoConfig, categorySEO, PORTFOLIO_CATEGORIES } from '../lib/seo';
+import { seoConfig, categorySEO } from '../lib/seo';
+import { PORTFOLIO_CATEGORIES } from '../lib/constants';
+import { PortfolioCategory } from '../types';
 
 interface SEOProviderProps {
   title?: string;
@@ -8,7 +10,7 @@ interface SEOProviderProps {
   keywords?: string[];
   image?: string;
   type?: 'website' | 'article' | 'video' | 'image';
-  category?: PORTFOLIO_CATEGORIES;
+  category?: PortfolioCategory;
   children: React.ReactNode;
 }
 
