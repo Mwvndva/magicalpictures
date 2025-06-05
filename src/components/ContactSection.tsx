@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { BookOpen, Camera, Users } from 'lucide-react';
-import { motion, useScroll, useTransform } from 'framer-motion';
 import SparkBackground from './SparkBackground';
+import { useResponsive } from './ui/responsive/ResponsiveContext';
 
 const getRandomColor = () => {
   const colors = [
@@ -21,84 +21,56 @@ const getRandomColor = () => {
 
 const ContactSection: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"]
-  });
+  const { width, isMobile, isTablet, isDesktop } = useResponsive();
 
-  // Animation transforms (can be adjusted later if needed)
-  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.8, 1, 0.8]);
-  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
-  const zIndex = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 100, 100, 0]);
 
   return (
-    <section id="contact" ref={sectionRef} className="py-20 bg-black relative overflow-hidden h-screen flex items-center justify-center">
+    <section 
+      ref={sectionRef} 
+      className="relative pt-96 pb-16 bg-black"
+    >
       <SparkBackground />
-      <motion.div 
-        className=""
-        style={{
-          scale,
-          opacity,
-          zIndex,
-        }}
+      <div
+        className="container mx-auto px-4 sm:px-6"
       >
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="font-heading font-bold text-5xl md:text-6xl text-yellow-400 uppercase tracking-wide mb-6">
-              CONTACT US
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+          <div>
+            <h2 className="font-heading font-bold text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl text-white uppercase tracking-wide mb-8">
+              GET IN TOUCH
             </h2>
-            <p className="font-body text-lg text-gray-300 max-w-2xl mx-auto">
-              Let's create something magical together. Reach out to discuss your next project.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-12">
-            <div>
-              <h3 className="font-heading font-semibold text-2xl text-white mb-6">
-                GET IN TOUCH
-              </h3>
-              
-              <div className="space-y-6">
-                <div className="flex items-start space-x-4">
-                  <div className="w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center mt-1">
-                    <svg className="w-4 h-4 text-black" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="font-body font-medium text-white">Phone</h4>
-                    <p className="text-gray-300">+1 (555) 123-4567</p>
-                  </div>
+            <div className="space-y-8">
+              <div className="flex items-start space-x-4">
+                <div className="w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center mt-1">
+                  <BookOpen className="w-4 h-4 text-black" />
                 </div>
-
-                <div className="flex items-start space-x-4">
-                  <div className="w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center mt-1">
-                    <svg className="w-4 h-4 text-black" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="font-body font-medium text-white">Email</h4>
-                    <p className="text-gray-300">hello@magicalpictures.com</p>
-                  </div>
+                <div>
+                  <h4 className="font-body font-medium text-base sm:text-lg md:text-xl text-white">Phone</h4>
+                  <p className="text-base sm:text-lg md:text-xl text-gray-300">+254 722 123 456</p>
                 </div>
+              </div>
 
-                <div className="flex items-start space-x-4">
-                  <div className="w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center mt-1">
-                    <svg className="w-4 h-4 text-black" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                      <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="font-body font-medium text-white">Location</h4>
-                    <p className="text-gray-300">Nairobi, Kenya</p>
-                  </div>
+              <div className="flex items-start space-x-4">
+                <div className="w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center mt-1">
+                  <Camera className="w-4 h-4 text-black" />
+                </div>
+                <div>
+                  <h4 className="font-body font-medium text-base sm:text-lg md:text-xl text-white">Email</h4>
+                  <p className="text-base sm:text-lg md:text-xl text-gray-300">hello@magicalpictures.com</p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4">
+                <div className="w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center mt-1">
+                  <Users className="w-4 h-4 text-black" />
+                </div>
+                <div>
+                  <h4 className="font-body font-medium text-base sm:text-lg md:text-xl text-white">Location</h4>
+                  <p className="text-base sm:text-lg md:text-xl text-gray-300">Nairobi, Kenya</p>
                 </div>
               </div>
 
               <div className="mt-8">
-                <h4 className="font-heading font-semibold text-xl text-white mb-4">
+                <h4 className="font-heading font-semibold text-2xl sm:text-3xl md:text-4xl text-white mb-4">
                   FOLLOW US
                 </h4>
                 <div className="flex space-x-4">
@@ -120,52 +92,52 @@ const ContactSection: React.FC = () => {
                 </div>
               </div>
             </div>
+          </div>
 
-            <div>
-              <h3 className="font-heading font-semibold text-2xl text-white mb-6">
+          <div>
+            <h3 className="font-heading font-semibold text-2xl text-white mb-6">
+              SEND MESSAGE
+            </h3>
+            
+            <form className="space-y-6">
+              <div>
+                <input
+                  type="text"
+                  placeholder="Your Name"
+                  className="w-full px-4 py-3 border-2 border-yellow-400 rounded-lg focus:border-white bg-black text-white outline-none transition-colors duration-300"
+                />
+              </div>
+              <div>
+                <input
+                  type="email"
+                  placeholder="Your Email"
+                  className="w-full px-4 py-3 border-2 border-yellow-400 rounded-lg focus:border-white bg-black text-white outline-none transition-colors duration-300"
+                />
+              </div>
+              <div>
+                <input
+                  type="text"
+                  placeholder="Project Type"
+                  className="w-full px-4 py-3 border-2 border-yellow-400 rounded-lg focus:border-white bg-black text-white outline-none transition-colors duration-300"
+                />
+              </div>
+              <div>
+                <textarea
+                  rows={5}
+                  placeholder="Tell us about your project..."
+                  className="w-full px-4 py-3 border-2 border-yellow-400 rounded-lg focus:border-white bg-black text-white outline-none transition-colors duration-300 resize-none"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-yellow-400 text-black font-heading font-semibold text-lg py-4 rounded-lg hover:bg-white hover:text-black transition-colors duration-300"
+              >
                 SEND MESSAGE
-              </h3>
-              
-              <form className="space-y-6">
-                <div>
-                  <input
-                    type="text"
-                    placeholder="Your Name"
-                    className="w-full px-4 py-3 border-2 border-yellow-400 rounded-lg focus:border-white bg-black text-white outline-none transition-colors duration-300"
-                  />
-                </div>
-                <div>
-                  <input
-                    type="email"
-                    placeholder="Your Email"
-                    className="w-full px-4 py-3 border-2 border-yellow-400 rounded-lg focus:border-white bg-black text-white outline-none transition-colors duration-300"
-                  />
-                </div>
-                <div>
-                  <input
-                    type="text"
-                    placeholder="Project Type"
-                    className="w-full px-4 py-3 border-2 border-yellow-400 rounded-lg focus:border-white bg-black text-white outline-none transition-colors duration-300"
-                  />
-                </div>
-                <div>
-                  <textarea
-                    rows={5}
-                    placeholder="Tell us about your project..."
-                    className="w-full px-4 py-3 border-2 border-yellow-400 rounded-lg focus:border-white bg-black text-white outline-none transition-colors duration-300 resize-none"
-                  ></textarea>
-                </div>
-                <button
-                  type="submit"
-                  className="w-full bg-yellow-400 text-black font-heading font-semibold text-lg py-4 rounded-lg hover:bg-white hover:text-black transition-colors duration-300"
-                >
-                  SEND MESSAGE
-                </button>
-              </form>
-            </div>
+              </button>
+            </form>
           </div>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 };

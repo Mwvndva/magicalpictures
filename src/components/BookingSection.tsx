@@ -1,82 +1,56 @@
 import React, { useRef } from 'react';
 import { BookOpen, Camera, Users } from 'lucide-react';
-import { motion, useScroll, useTransform } from 'framer-motion';
 import SparkBackground from './SparkBackground';
 
 const BookingSection: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"]
-  });
-
-  // Animation transforms (can be adjusted later if needed)
-  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 2, 3]);
-  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
-  const zIndex = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 100, 100, 0]);
 
   return (
-    <section ref={sectionRef} className="py-20 bg-black relative overflow-hidden mb-20 h-screen flex items-center justify-center">
+    <section ref={sectionRef} className="pt-32 pb-3072 bg-black relative overflow-hidden">
       <SparkBackground />
-      <motion.div 
-        className="container mx-auto px-6 h-full flex justify-center items-center"
-        style={{
-          scale,
-          opacity,
-          zIndex,
-        }}
-      >
-        <div className="w-[400px] h-[280px] bg-black text-white p-6 rounded-xl shadow-2xl flex flex-col justify-center items-center">
-          <h2 
-            className="font-heading font-bold text-5xl text-yellow-400 uppercase tracking-wide mb-6"
-          >
-            Book Your Session
-          </h2>
-          <p 
-            className="font-body text-sm text-center mb-4"
-          >
-            Ready to capture your special moments? Contact us to schedule your videography session.
-          </p>
-          <div className="flex space-x-4 mb-4">
-            <div className="flex flex-col items-center">
-              <Camera size={24} className="text-yellow-400 mb-1" />
-              <span 
-                className="font-body text-sm"
+      <div className="container mx-auto px-4 sm:px-6 h-full">
+        <div 
+          className="h-full flex justify-center items-center"
+        >
+          <div className="w-full max-w-2xl">
+            <div className="bg-black text-white p-6 rounded-xl shadow-2xl flex flex-col justify-center items-center">
+              <h2 
+                className="font-heading font-bold text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl text-yellow-400 uppercase tracking-wide mb-6 whitespace-nowrap"
               >
-                Videography
-              </span>
-            </div>
-            <div className="flex flex-col items-center">
-              <Users size={24} className="text-yellow-400 mb-1" />
-              <span 
-                className="font-body text-sm"
+                Book Your Session
+              </h2>
+              <p 
+                className="font-body text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 text-center mb-4"
               >
-                Events
-              </span>
-            </div>
-            <div className="flex flex-col items-center">
-              <BookOpen size={20} className="text-yellow-400 mb-1" />
-              <span 
-                className="font-body text-xs"
+                Ready to capture your special moments? Contact us to schedule your videography session.
+              </p>
+              <div className="flex space-x-4 mb-4">
+                <div className="flex flex-col items-center">
+                  <Camera size={24} className="text-yellow-400 mb-1" />
+                  <span 
+                    className="font-body text-base sm:text-lg md:text-xl text-gray-300"
+                  >
+                    Videography
+                  </span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <Users size={24} className="text-yellow-400 mb-1" />
+                  <span 
+                    className="font-body text-base sm:text-lg md:text-xl text-gray-300"
+                  >
+                    Team
+                  </span>
+                </div>
+              </div>
+              <button 
+                className="bg-yellow-400 text-black font-bold py-4 px-8 rounded-full hover:bg-yellow-500 transition-colors duration-300 text-lg sm:text-xl md:text-2xl"
               >
-                Consultation
-              </span>
+                Book Now
+              </button>
             </div>
           </div>
-          <button
-            type="button"
-            className="font-heading px-4 py-1 bg-yellow-400 text-black font-semibold rounded-full hover:bg-yellow-500 transition-colors duration-300"
-            onClick={() => {
-              const contactSection = document.getElementById('contact');
-              if (contactSection) {
-                contactSection.scrollIntoView({ behavior: 'smooth' });
-              }
-            }}
-          >
-            Book Now
-              </button>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 };
