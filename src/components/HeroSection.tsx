@@ -30,6 +30,9 @@ const HeroSection: React.FC = () => {
               <h1 className="font-heading font-bold text-4xl sm:text-5xl md:text-6xl lg:text-8xl xl:text-9xl text-white uppercase tracking-wider hover:text-yellow-400 transition-colors duration-300 mt-4">
                 PICTURES
               </h1>
+              <h1 className="font-heading font-bold text-4xl sm:text-5xl md:text-6xl lg:text-8xl xl:text-9xl text-white uppercase tracking-wider hover:text-yellow-400 transition-colors duration-300 mt-4">
+                PRODUCTIONS
+              </h1>
               <p className="font-body text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 mt-8 sm:mt-10 md:mt-12 hover:text-yellow-400 transition-colors duration-300 max-w-2xl mx-auto">
                 Cinematic Videography That Tells Your Story
               </p>
