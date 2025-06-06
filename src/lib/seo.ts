@@ -23,8 +23,8 @@ export const seoConfig: SEOConfig = {
   locale: 'en_US'
 };
 
-export const categorySEO: Record<PORTFOLIO_CATEGORIES, SEOConfig> = {
-  Wedding: {
+export const categorySEO: Record<keyof typeof PORTFOLIO_CATEGORIES, SEOConfig> = {
+  WEDDING: {
     title: 'Wedding Photography & Videography Services',
     description: 'Capture your special day with our professional wedding photography and videography services. Preserve every moment of your wedding day.',
     keywords: [
@@ -35,7 +35,7 @@ export const categorySEO: Record<PORTFOLIO_CATEGORIES, SEOConfig> = {
     type: 'website',
     locale: 'en_US'
   },
-  Corporate: {
+  CORPORATE: {
     title: 'Corporate Photography & Videography Services',
     description: 'Professional corporate photography and videography services for businesses, events, and branding.',
     keywords: [
@@ -46,7 +46,7 @@ export const categorySEO: Record<PORTFOLIO_CATEGORIES, SEOConfig> = {
     type: 'website',
     locale: 'en_US'
   },
-  Music: {
+  MUSIC: {
     title: 'Music Video Production Services',
     description: 'Create professional music videos that capture the essence of your music and brand.',
     keywords: [
@@ -57,7 +57,7 @@ export const categorySEO: Record<PORTFOLIO_CATEGORIES, SEOConfig> = {
     type: 'website',
     locale: 'en_US'
   },
-  Documentary: {
+  DOCUMENTARY: {
     title: 'Documentary Film Production Services',
     description: 'Professional documentary film production services to tell your story.',
     keywords: [
@@ -65,6 +65,28 @@ export const categorySEO: Record<PORTFOLIO_CATEGORIES, SEOConfig> = {
     ],
     image: '/categories/documentary-og.jpg',
     url: 'https://magical-lens-pictures.com/documentary',
+    type: 'website',
+    locale: 'en_US'
+  },
+  COMMERCIAL: {
+    title: 'Commercial Photography & Videography Services',
+    description: 'High-quality commercial photography and videography for advertising and marketing campaigns.',
+    keywords: [
+      'commercial photographer', 'commercial videographer', 'advertising photography', 'product photography', 'commercial video production'
+    ],
+    image: '/categories/commercial-og.jpg',
+    url: 'https://magical-lens-pictures.com/commercial',
+    type: 'website',
+    locale: 'en_US'
+  },
+  BRAND: {
+    title: 'Brand Photography & Video Production',
+    description: 'Professional brand photography and video production to elevate your brand identity.',
+    keywords: [
+      'brand photographer', 'brand videographer', 'branding photography', 'brand video', 'brand content creation'
+    ],
+    image: '/categories/brand-og.jpg',
+    url: 'https://magical-lens-pictures.com/brand',
     type: 'website',
     locale: 'en_US'
   }

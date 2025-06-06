@@ -8,13 +8,13 @@ const HeroSection: React.FC = () => {
       {/* Background Video */}
       <div className="absolute inset-0 w-full h-full">
         <video
-          className="w-full h-full object-cover opacity-40 max-h-screen"
+          className="w-full h-full object-cover opacity-80 max-h-screen"
           autoPlay
           muted
           loop
           playsInline
         >
-          <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4" />
+          <source src="/videos/hero-video.mp4" type="video/mp4" />
           {/* Fallback gradient if video doesn't load */}
         </video>
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-black/80"></div>

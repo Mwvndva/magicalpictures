@@ -20,7 +20,7 @@ export const theme = {
     '2xl': '3rem',
   },
   breakpoints: {
-    mobile: `${BREAKPOINTS.MOBILE}px`,
+    mobile: `${BREAKPOINTS.MOBILE_S}px`,
     tablet: `${BREAKPOINTS.TABLET}px`,
     desktop: `${BREAKPOINTS.DESKTOP}px`,
   },
