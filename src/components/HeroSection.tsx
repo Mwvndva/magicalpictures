@@ -1,22 +1,67 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 
 const HeroSection: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+
+  // Preload the video
+  useEffect(() => {
+    if (videoRef.current) {
+      // Force the video to start loading
+      videoRef.current.load();
+      
+      // Try to play the video (muted autoplay)
+      const playPromise = videoRef.current.play();
+      
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsVideoPlaying(true);
+          })
+          .catch(error => {
+            console.log('Autoplay prevented:', error);
+            // Fallback: Show play button
+          });
+      }
+    }
+  }, []);
+
+  const handleVideoLoaded = () => {
+    setIsVideoLoaded(true);
+    if (videoRef.current) {
+      videoRef.current.play().catch(e => console.log('Autoplay prevented:', e));
+    }
+  };
 
   return (
     <section ref={sectionRef} className="relative min-h-screen bg-black overflow-hidden">
       {/* Background Video */}
       <div className="absolute inset-0 w-full h-full">
         <video
-          className="w-full h-full object-cover opacity-80 max-h-screen"
+          ref={videoRef}
+          className={`w-full h-full object-cover opacity-80 max-h-screen transition-opacity duration-1000 ${isVideoLoaded ? 'opacity-100' : 'opacity-0'}`}
           autoPlay
           muted
           loop
           playsInline
+          preload="auto"
+          onLoadedData={handleVideoLoaded}
+          poster="/images/hero-poster.jpg"
         >
+          {/* Multiple sources for better browser compatibility */}
+          <source src="/videos/hero-video.webm" type="video/webm" />
           <source src="/videos/hero-video.mp4" type="video/mp4" />
-          {/* Fallback gradient if video doesn't load */}
+          {/* Fallback image if video doesn't load */}
+          <img src="/images/hero-fallback.jpg" alt="Magical Pictures Hero" className="w-full h-full object-cover" />
         </video>
+        {/* Loading overlay */}
+        {!isVideoLoaded && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+            <div className="animate-pulse text-white">Loading...</div>
+          </div>
+        )}
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-black/80"></div>
       </div>
 
