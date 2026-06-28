@@ -3,7 +3,7 @@ import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LogOut, Plus, FolderPlus, Image as ImageIcon, Youtube, Film,
-  Wifi, WifiOff, Menu, X, ChevronLeft, AlertTriangle, Loader2,
+  Wifi, WifiOff, Menu, X, AlertTriangle, Loader2, CheckCircle2, Save,
 } from 'lucide-react';
 import { useAdminAuth } from '@/components/admin/AdminAuthContext';
 import { useAdminStore } from '@/lib/admin-store';
@@ -22,6 +22,7 @@ export default function AdminDashboardPage() {
   // ── store ────────────────────────────────────────────────────────────────
   const {
     data, loading, serverAvailable,
+    saveStatus, saveAndPublish,
     addCategory, editCategory, deleteCategory, reorderCategories,
     addImage, editImage, deleteImage, reorderImages,
     addVideo, editVideo, deleteVideo, reorderVideos,
@@ -160,28 +161,54 @@ export default function AdminDashboardPage() {
         <img src="/assets/logo/logo.png" alt="" className="h-7 w-7 object-contain rounded-md shrink-0" />
         <span className="font-bold text-white text-sm hidden sm:block">Admin — Magical Pictures</span>
 
-        {/* Server badge */}
-        <div className="ml-auto flex items-center gap-3">
+        {/* Right side controls */}
+        <div className="ml-auto flex items-center gap-2 sm:gap-3">
+
+          {/* Server badge */}
           <div className={`hidden sm:flex items-center gap-1.5 text-xs rounded-full px-2.5 py-1
-            ${serverAvailable ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
+            ${serverAvailable ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}`}>
             {serverAvailable ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
-            {serverAvailable ? 'Server connected' : 'Offline mode'}
+            {serverAvailable ? 'Connected' : 'Offline'}
           </div>
 
           {/* View site */}
-          <Link
-            to="/"
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
             className="hidden sm:flex text-xs text-zinc-400 hover:text-yellow-400 transition-colors underline underline-offset-2"
           >
             View site
-          </Link>
+          </a>
+
+          {/* ── Save & Publish button ── */}
+          <motion.button
+            onClick={() => saveAndPublish(data)}
+            disabled={saveStatus === 'saving'}
+            whileTap={{ scale: 0.96 }}
+            className={`flex items-center gap-1.5 text-xs font-semibold rounded-lg px-3 py-1.5 transition-all duration-200 ${
+              saveStatus === 'saved'
+                ? 'bg-emerald-500 text-white'
+                : saveStatus === 'saving'
+                ? 'bg-yellow-500/80 text-black cursor-not-allowed'
+                : 'bg-yellow-500 hover:bg-yellow-400 text-black'
+            }`}
+          >
+            {saveStatus === 'saving' && (
+              <span className="h-3.5 w-3.5 border-2 border-black/40 border-t-black rounded-full animate-spin" />
+            )}
+            {saveStatus === 'saved' && <CheckCircle2 className="h-3.5 w-3.5" />}
+            {saveStatus === 'idle' && <Save className="h-3.5 w-3.5" />}
+            {saveStatus === 'saving' ? 'Saving…' : saveStatus === 'saved' ? 'Published!' : 'Save & Publish'}
+          </motion.button>
 
           {/* Logout */}
           <button
             onClick={logout}
             className="flex items-center gap-1.5 text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white rounded-lg px-3 py-1.5 transition-colors"
           >
-            <LogOut className="h-3.5 w-3.5" /> Logout
+            <LogOut className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Logout</span>
           </button>
         </div>
       </header>

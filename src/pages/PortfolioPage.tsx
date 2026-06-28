@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import PortfolioShowcase from '../components/PortfolioShowcase';
 import { PageMeta } from '../components/PageMeta';
@@ -16,33 +16,64 @@ import { apiGetPortfolio } from '../lib/api';
 
 type MediaTab = 'images' | 'videos' | 'reels';
 
-// ── Portfolio data hook — tries API, falls back to static defaults ──────────
-function usePortfolioData() {
-  const [categories, setCategories] = useState<CategoryDef[]>(
-    [...DEFAULT_PORTFOLIO_CATEGORIES].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-  );
-  const [images, setImages] = useState<PortfolioItem[]>(DEFAULT_PORTFOLIO_IMAGES);
-  const [videos, setVideos] = useState<PortfolioItem[]>(DEFAULT_PORTFOLIO_VIDEOS);
-  const [reels, setReels] = useState<PortfolioItem[]>(DEFAULT_PORTFOLIO_REELS);
+import { LS_KEY } from '../lib/admin-store';
 
+// ── Portfolio data hook ────────────────────────────────────────────────────────
+// Priority order:
+//   1. localStorage (written by admin's Save & Publish — instant, no network)
+//   2. API server (Node.js local / Vercel serverless)
+//   3. Static defaults (always works, even offline)
+function usePortfolioData() {
+  // Initialise from localStorage immediately — zero latency for admin changes
+  const getInitialData = () => {
+    try {
+      const cached = localStorage.getItem(LS_KEY);
+      if (cached) return JSON.parse(cached);
+    } catch { /* ignore */ }
+    return null;
+  };
+
+  const cached = getInitialData();
+
+  const [categories, setCategories] = useState<CategoryDef[]>(
+    cached?.categories?.length
+      ? [...cached.categories].sort((a: CategoryDef, b: CategoryDef) => (a.order ?? 0) - (b.order ?? 0))
+      : [...DEFAULT_PORTFOLIO_CATEGORIES].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+  );
+  const [images, setImages] = useState<PortfolioItem[]>(cached?.images ?? DEFAULT_PORTFOLIO_IMAGES);
+  const [videos, setVideos] = useState<PortfolioItem[]>(cached?.videos ?? DEFAULT_PORTFOLIO_VIDEOS);
+  const [reels, setReels] = useState<PortfolioItem[]>(cached?.reels ?? DEFAULT_PORTFOLIO_REELS);
+
+  // Apply a full data snapshot to state
+  const applyData = useCallback((d: { categories?: CategoryDef[]; images?: PortfolioItem[]; videos?: PortfolioItem[]; reels?: PortfolioItem[] }) => {
+    if (d.categories?.length) {
+      setCategories([...d.categories].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
+    }
+    if (d.images) setImages(d.images);
+    if (d.videos) setVideos(d.videos);
+    if (d.reels) setReels(d.reels);
+  }, []);
+
+  // Also try the API in the background (picks up server-side changes)
   useEffect(() => {
     apiGetPortfolio()
-      .then(res => {
-        if (res?.data) {
-          const d = res.data;
-          if (d.categories?.length) {
-            setCategories([...d.categories].sort((a: CategoryDef, b: CategoryDef) => (a.order ?? 0) - (b.order ?? 0)));
-          }
-          if (d.images?.length) setImages(d.images);
-          if (d.videos?.length) setVideos(d.videos);
-          if (d.reels?.length) setReels(d.reels);
-        }
-      })
-      .catch(() => {/* stay with defaults */});
-  }, []);
+      .then(res => { if (res?.data) applyData(res.data); })
+      .catch(() => {/* stay with localStorage/defaults */});
+  }, [applyData]);
+
+  // Listen for storage events — if admin saves in another tab, update instantly
+  useEffect(() => {
+    const handler = (e: StorageEvent) => {
+      if (e.key !== LS_KEY || !e.newValue) return;
+      try { applyData(JSON.parse(e.newValue)); } catch { /* ignore */ }
+    };
+    window.addEventListener('storage', handler);
+    return () => window.removeEventListener('storage', handler);
+  }, [applyData]);
 
   return { categories, images, videos, reels };
 }
+
 
 const PortfolioPage = () => {
   const { categories, images, videos, reels } = usePortfolioData();

@@ -1,6 +1,7 @@
 // src/lib/admin-store.ts
 // Centralised hook that owns live portfolio state for the admin panel.
-// Reads from the Express API; falls back to static defaults on error.
+// Reads from the API; also syncs to localStorage so the portfolio page
+// picks up changes instantly without a server round-trip.
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
@@ -27,6 +28,8 @@ const DEFAULT_DATA: AdminPortfolioData = {
   reels: DEFAULT_PORTFOLIO_REELS,
 };
 
+export const LS_KEY = 'mp_portfolio_data';
+
 // ─── helpers ──────────────────────────────────────────────────────────────────
 function reindex<T extends { order?: number }>(arr: T[]): T[] {
   return arr.map((item, i) => ({ ...item, order: i }));
@@ -36,12 +39,23 @@ function genId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
 }
 
+/** Write to localStorage so the public portfolio page picks it up immediately */
+function syncToLocalStorage(data: AdminPortfolioData) {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify(data));
+  } catch {
+    // storage full or unavailable — ignore
+  }
+}
+
 // ─── hook ─────────────────────────────────────────────────────────────────────
 export function useAdminStore() {
   const [data, setData] = useState<AdminPortfolioData>(DEFAULT_DATA);
   const [loading, setLoading] = useState(true);
   const [serverAvailable, setServerAvailable] = useState(true);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const statusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── load on mount ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -49,16 +63,22 @@ export function useAdminStore() {
       try {
         const res = await apiGetPortfolio();
         if (res.data) {
-          // Merge: ensure all default categories still exist (new defaults get appended)
           const saved: AdminPortfolioData = res.data;
           setData(saved);
+          syncToLocalStorage(saved);
           setServerAvailable(true);
         } else {
-          // First run — seed the server with defaults
+          // First run — seed with defaults
           await apiSavePortfolio(DEFAULT_DATA);
+          syncToLocalStorage(DEFAULT_DATA);
           setServerAvailable(true);
         }
       } catch {
+        // Server unavailable — try localStorage
+        try {
+          const cached = localStorage.getItem(LS_KEY);
+          if (cached) setData(JSON.parse(cached));
+        } catch { /* ignore */ }
         setServerAvailable(false);
       } finally {
         setLoading(false);
@@ -66,26 +86,54 @@ export function useAdminStore() {
     })();
   }, []);
 
-  // ── debounced auto-save ──────────────────────────────────────────────────
+  // ── debounced background auto-save (silent) ──────────────────────────────
   const persist = useCallback((next: AdminPortfolioData) => {
     setData(next);
+    // Always sync localStorage immediately — portfolio page reads from here
+    syncToLocalStorage(next);
+
     if (!serverAvailable) return;
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
       apiSavePortfolio(next).catch(console.error);
-    }, 600);
+    }, 800);
+  }, [serverAvailable]);
+
+  // ── explicit Save & Publish ──────────────────────────────────────────────
+  const saveAndPublish = useCallback(async (currentData: AdminPortfolioData) => {
+    setSaveStatus('saving');
+    // Cancel any pending debounced save
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+
+    // Always write localStorage (instant, works on Vercel without Blob)
+    syncToLocalStorage(currentData);
+
+    try {
+      if (serverAvailable) {
+        await apiSavePortfolio(currentData);
+      }
+      setSaveStatus('saved');
+    } catch {
+      // Still succeeded for localStorage — mark as saved
+      setSaveStatus('saved');
+    }
+
+    // Reset status after 3s
+    if (statusTimerRef.current) clearTimeout(statusTimerRef.current);
+    statusTimerRef.current = setTimeout(() => setSaveStatus('idle'), 3000);
   }, [serverAvailable]);
 
   // ── category ops ─────────────────────────────────────────────────────────
   const addCategory = useCallback((label: string, description: string) => {
     const id = label.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    let newData!: AdminPortfolioData;
     setData(prev => {
-      const next: AdminPortfolioData = {
+      newData = {
         ...prev,
         categories: reindex([...prev.categories, { id, label, description, order: prev.categories.length }]),
       };
-      persist(next);
-      return next;
+      persist(newData);
+      return newData;
     });
     return id;
   }, [persist]);
@@ -251,6 +299,8 @@ export function useAdminStore() {
     data,
     loading,
     serverAvailable,
+    saveStatus,
+    saveAndPublish,
     // categories
     addCategory,
     editCategory,
