@@ -60,26 +60,44 @@ export function useAdminStore() {
   // ── load on mount ────────────────────────────────────────────────────────
   useEffect(() => {
     (async () => {
+      // Step 1 — load localStorage immediately (zero latency, no flash)
+      let localData: AdminPortfolioData | null = null;
+      try {
+        const raw = localStorage.getItem(LS_KEY);
+        if (raw) {
+          localData = JSON.parse(raw);
+          if (localData) setData(localData); // show instantly before API responds
+        }
+      } catch { /* ignore */ }
+
+      // Step 2 — try the API in the background
       try {
         const res = await apiGetPortfolio();
         if (res.data) {
-          const saved: AdminPortfolioData = res.data;
-          setData(saved);
-          syncToLocalStorage(saved);
+          // Server has data — it is the authoritative source
+          setData(res.data);
+          syncToLocalStorage(res.data);
           setServerAvailable(true);
         } else {
-          // First run — seed with defaults
-          await apiSavePortfolio(DEFAULT_DATA);
-          syncToLocalStorage(DEFAULT_DATA);
+          // Server returned null (no data file yet)
           setServerAvailable(true);
+          if (localData) {
+            // Restore from localStorage → save it to the server so it persists
+            await apiSavePortfolio(localData);
+          } else {
+            // Truly first run — seed with hardcoded defaults
+            await apiSavePortfolio(DEFAULT_DATA);
+            syncToLocalStorage(DEFAULT_DATA);
+            setData(DEFAULT_DATA);
+          }
         }
       } catch {
-        // Server unavailable — try localStorage
-        try {
-          const cached = localStorage.getItem(LS_KEY);
-          if (cached) setData(JSON.parse(cached));
-        } catch { /* ignore */ }
+        // Server unavailable — localStorage data (already set above) is all we have
         setServerAvailable(false);
+        if (!localData) {
+          // Nothing anywhere — use hardcoded defaults
+          setData(DEFAULT_DATA);
+        }
       } finally {
         setLoading(false);
       }
